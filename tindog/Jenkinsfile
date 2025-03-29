@@ -11,8 +11,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t tindog-nginx .'
-                    sh 'docker images'  // Show all available Docker images
+                    // Build Docker image from the Dockerfile located in the root directory
+                    sh 'docker build -t tindog-nginx .' // "." refers to the current directory
+                    sh 'docker images'  // List all available Docker images
                 }
             }
         }
@@ -26,7 +27,7 @@ pipeline {
 
                     // Run the new container
                     sh 'docker run -d --name tindog-container -p 80:80 tindog-nginx'
-                    sh 'docker ps -a'  // Show all running and stopped containers
+                    sh 'docker ps -a'  // List all running and stopped containers
                 }
             }
         }
