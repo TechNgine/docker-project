@@ -11,9 +11,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Get the Jenkins build number
+                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
+                    
                     // Navigate into the tindog directory and build the Docker image
                     dir('tindog') {
-                        sh 'docker build -t tindog-nginx .' // Build Docker image
+                        sh "docker build -t ${buildTag} ." // Build Docker image with build number as part of the tag
                     }
                     sh 'docker images'  // List all available Docker images
                 }
@@ -23,8 +26,11 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the container
-                    sh 'docker run -d --name tindog-container -p 80:80 tindog-nginx'
+                    // Get the Jenkins build number
+                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
+
+                    // Run the container using the tag with build number
+                    sh "docker run -d --name tindog-container -p 80:80 ${buildTag}"
                     sh 'docker ps -a'  // List all running and stopped containers
                 }
             }
@@ -33,8 +39,11 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
+                    // Get the Jenkins build number
+                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
+
                     // Remove the Docker image
-                    sh 'docker rmi tindog-nginx || true'  // Remove the image used for the container
+                    sh "docker rmi ${buildTag} || true"  // Remove the image used for the container
                     sh 'docker images'  // List available images to confirm deletion
 
                     // Clean up Jenkins workspace
