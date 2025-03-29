@@ -11,8 +11,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image from the Dockerfile located in the root directory
-                    sh 'docker build -t tindog-nginx .' // "." refers to the current directory
+                    // Navigate into the tindog directory and build the Docker image
+                    dir('tindog') {
+                        sh 'docker build -t tindog-nginx .' // Now, build from inside the tindog folder
+                    }
                     sh 'docker images'  // List all available Docker images
                 }
             }
