@@ -13,7 +13,7 @@ pipeline {
                 script {
                     // Navigate into the tindog directory and build the Docker image
                     dir('tindog') {
-                        sh 'docker build -t tindog-nginx .' // Now, build from inside the tindog folder
+                        sh 'docker build -t tindog-nginx .' // Build Docker image
                     }
                     sh 'docker images'  // List all available Docker images
                 }
@@ -23,13 +23,22 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Stop and remove any existing container if running
-                    sh 'docker stop tindog-container || true'
-                    sh 'docker rm tindog-container || true'
-
-                    // Run the new container
+                    // Run the container
                     sh 'docker run -d --name tindog-container -p 80:80 tindog-nginx'
                     sh 'docker ps -a'  // List all running and stopped containers
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                script {
+                    // Remove the Docker image
+                    sh 'docker rmi tindog-nginx || true'  // Remove the image used for the container
+                    sh 'docker images'  // List available images to confirm deletion
+
+                    // Clean up Jenkins workspace
+                    deleteDir()  // Clear the Jenkins workspace
                 }
             }
         }
@@ -37,7 +46,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment Successful! Access your TinDog project at http://localhost'
+            echo 'Deployment and Cleanup Successful! The container is still running.'
         }
         failure {
             echo 'Deployment Failed!'
