@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Define the image tag with the build number appended to the base name
+        buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -11,12 +16,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Get the Jenkins build number
-                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
-                    
                     // Navigate into the tindog directory and build the Docker image
                     dir('tindog') {
-                        sh "docker build -t ${buildTag} ." // Build Docker image with build number as part of the tag
+                        sh "docker build -t ${buildTag} ." // Build Docker image with build number appended to the tag
                     }
                     sh 'docker images'  // List all available Docker images
                 }
@@ -26,10 +28,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Get the Jenkins build number
-                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
-
-                    // Run the container using the tag with build number
+                    // Run the container using the image with the build number appended
                     sh "docker run -d --name tindog-container -p 80:80 ${buildTag}"
                     sh 'docker ps -a'  // List all running and stopped containers
                 }
@@ -39,9 +38,6 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    // Get the Jenkins build number
-                    def buildTag = "tindog-nginx-${env.BUILD_NUMBER}"
-
                     // Remove the Docker image
                     sh "docker rmi ${buildTag} || true"  // Remove the image used for the container
                     sh 'docker images'  // List available images to confirm deletion
