@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/TechNgine/docker-project.git'
+                git branch: 'dennis', url: 'https://github.com/TechNgine/docker-project.git'
             }
         }
 
@@ -12,6 +12,7 @@ pipeline {
             steps {
                 script {
                     sh 'docker build -t tindog-nginx .'
+                    sh 'docker images'  // Show all available Docker images
                 }
             }
         }
@@ -25,8 +26,18 @@ pipeline {
 
                     // Run the new container
                     sh 'docker run -d --name tindog-container -p 80:80 tindog-nginx'
+                    sh 'docker ps -a'  // Show all running and stopped containers
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment Successful! Access your TinDog project at http://localhost'
+        }
+        failure {
+            echo 'Deployment Failed!'
         }
     }
 }
